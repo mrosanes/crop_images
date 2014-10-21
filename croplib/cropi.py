@@ -61,11 +61,9 @@ class CropClass:
         self.crop_right_columns = 0
         return
 
-    ### Get image ###
-    def getSingleImage(self, numimg):
-        image_retrieved = self.input_nexusfile.getslab(
-                            [numimg, 0, 0], [1, self.numrows, self.numcols])
-        return image_retrieved
+
+
+
 
     ### Save image ###
     def writeImageInHdf5(self, image, nxsfied , slab_offset):
@@ -75,16 +73,16 @@ class CropClass:
     def cropFunc(self):
 
         print("crop function")
-        self.crop_top_rows = c_tr = 10 #raw_input(
+        self.crop_top_rows = c_tr = 0 #raw_input(
                                        #"Number of top rows to be cropped: ")
-        self.crop_bottom_rows = c_br = 20 #raw_input(
+        self.crop_bottom_rows = c_br = 0 #raw_input(
                                       # "Number of bottom rows to be cropped: ")
-        self.crop_left_columns = c_lc = 30 #raw_input(
+        self.crop_left_columns = c_lc = 0 #raw_input(
                                      #"Number of left columns to be cropped: ")
-        self.crop_right_columns = c_rc = 40 #raw_input(
+        self.crop_right_columns = c_rc = 0 #raw_input(
                                     #"Number of right columns to be cropped: ")
 
-        cropentry = self.itreename + '_crop'
+        cropentry = self.itreename + '_cropisis'
 
       
         tomonorm_grp = self.input_nexusfile.TomoNormalized
@@ -95,9 +93,40 @@ class CropClass:
         self.numrows_ac = self.numrows - c_tr - c_br
         self.numcols_ac = self.numcols - c_lc - c_rc
 
+
+        tomonorm_grp[cropentry] = nxs.NXfield(
+                      name=cropentry, dtype='float32' , 
+                      shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
         tomonorm_grp[cropentry].attrs['Number of Frames'] = self.nFrames
-        tomonorm_grp[cropentry] = 123
-        tomonorm_grp[cropentry].save()
+        tomonorm_grp[cropentry].attrs['Pixel Rows'] = self.numrows_ac
+        tomonorm_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
+
+        numimg = 0
+        image_retrieved = tomonorm_grp.TomoNormalized[0, :, :] #, [1, self.numrows, self.numcols])
+
+        #tomonorm_grp.TomoNormalized_cropis.put(image_retrieved, [80,0,0])
+        tomonorm_grp[cropentry].put(image_retrieved, [80,0,0])
+
+        tomonorm_grp[cropentry].write()
+        #tomonorm_grp[cropentry].save()
+
+        print(image_retrieved)
+
+
+
+        """
+        self.fastalign[self.data_nxs] = nxs.NXfield(
+                        name=self.data_nxs, dtype='float32' , 
+                        shape=[nxs.UNLIMITED, self.numrows, self.numcols])
+        self.fastalign[self.data_nxs].attrs[
+                                         'Number of Frames'] = self.nFrames
+        self.fastalign[self.data_nxs].attrs[
+                                                'Pixel Rows'] = self.numrows    
+        self.fastalign[self.data_nxs].attrs[
+                                             'Pixel Columns'] = self.numcols
+        self.fastalign[self.data_nxs].write()    
+
+        """
 
 
 
@@ -107,22 +136,22 @@ class CropClass:
 
 
 
+        #tomonorm_grp[cropentry]
+        #tomonorm_grp[cropentry] = image_retrieved
+        #nxsfied.put(image, slab_offset, refresh=False)
+        #tomonorm_grp[cropentry].write()
 
 
-
-
-
-
-
-
-
-
+        print("###hih###")
+        print image_retrieved[0][0][0]
+        print(image_retrieved.shape)
+        print("###hih###")
 
         print("#########")
         print(tomonorm_grp.TomoNormalized.attrs)
         print(tomonorm_grp.TomoNormalized.shape)
         print("#########")
-        print(self.input_nexusfile.TomoNormalized[cropentry])
+        #print(self.input_nexusfile.TomoNormalized[cropentry])
         print(self.ifilepath)
         print(self.ifilepathname)
         print(self.ifilename)
@@ -132,9 +161,10 @@ class CropClass:
 
 
 
-
-
-
+        #self.input_nexusfile.opengroup('TomoNormalized')
+        #self.input_nexusfile.opendata(self.itreename)
+        #slab_offset = [1, 0, 0]
+        #nxsfied.put(image_retrieved, slab_offset, refresh=True)
 
         #print(self.input_nexusfile.tree)
         #print(self.input_nexusfile.TomoNormalized.TomoNormalized[0, 0 , 0])
