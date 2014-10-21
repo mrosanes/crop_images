@@ -45,11 +45,15 @@ class CropClass:
             self.ifilepath = '.'
         self.crop = crop          
 
-        # Images
+        # Stack dimensions
         self.nFrames = 0                
         self.numrows = 0
         self.numcols = 0
         self.dim_images = (0, 0, 1)
+
+        # Image dimensions after cropping              
+        self.numrows_ac = 0
+        self.numcols_ac = 0
 
         self.crop_top_rows = 0
         self.crop_bottom_rows = 0
@@ -68,24 +72,62 @@ class CropClass:
         nxsfied.put(image, slab_offset, refresh=False)
         nxsfied.write()
     
-
     def cropFunc(self):
 
-        self.itreename
+        print("crop function")
+        self.crop_top_rows = c_tr = 10 #raw_input(
+                                       #"Number of top rows to be cropped: ")
+        self.crop_bottom_rows = c_br = 20 #raw_input(
+                                      # "Number of bottom rows to be cropped: ")
+        self.crop_left_columns = c_lc = 30 #raw_input(
+                                     #"Number of left columns to be cropped: ")
+        self.crop_right_columns = c_rc = 40 #raw_input(
+                                    #"Number of right columns to be cropped: ")
+
         cropentry = self.itreename + '_crop'
 
-        print("crop function")
-        print(self.input_nexusfile.tree)
-    
-        print(self.input_nexusfile.TomoNormalized.TomoNormalized[0, 0 , 0])
-        self.input_nexusfile.TomoNormalized[cropentry] = 123
-        self.input_nexusfile.TomoNormalized[cropentry].save()
-        print(self.input_nexusfile.TomoNormalized.cropentry)
-        print(self.input_nexusfile.tree)
+      
+        tomonorm_grp = self.input_nexusfile.TomoNormalized
+        self.nFrames = tomonorm_grp.TomoNormalized.shape[0]
+        self.numrows = tomonorm_grp.TomoNormalized.shape[1]
+        self.numcols = tomonorm_grp.TomoNormalized.shape[2]
+               
+        self.numrows_ac = self.numrows - c_tr - c_br
+        self.numcols_ac = self.numcols - c_lc - c_rc
 
+        tomonorm_grp[cropentry].attrs['Number of Frames'] = self.nFrames
+        tomonorm_grp[cropentry] = 123
+        tomonorm_grp[cropentry].save()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        print("#########")
+        print(tomonorm_grp.TomoNormalized.attrs)
+        print(tomonorm_grp.TomoNormalized.shape)
+        print("#########")
+        print(self.input_nexusfile.TomoNormalized[cropentry])
         print(self.ifilepath)
         print(self.ifilepathname)
         print(self.ifilename)
+        print(self.nFrames)
+        print(self.input_nexusfile.__class__)
 
 
 
@@ -94,6 +136,52 @@ class CropClass:
 
 
 
+        #print(self.input_nexusfile.tree)
+        #print(self.input_nexusfile.TomoNormalized.TomoNormalized[0, 0 , 0])
+
+
+
+
+
+
+
+
+
+
+
+        """self.infoshape = self.input_nexusfile.getinfo()
+        self.dim_images = (self.infoshape[0][0], self.infoshape[0][1], 
+                               self.infoshape[0][2])
+        self.nFrames = self.infoshape[0][0]
+        self.numrows = self.infoshape[0][1]
+        self.numcols = self.infoshape[0][2]"""
+
+
+
+
+
+
+
+
+
+
+        """self.fastalign[self.data_nxs].attrs[
+                                         'Number of Frames'] = self.nFrames
+        self.fastalign[self.data_nxs].attrs[
+                                                'Pixel Rows'] = self.numrows    
+        self.fastalign[self.data_nxs].attrs[
+                                             'Pixel Columns'] = self.numcols
+        self.fastalign[self.data_nxs].write() """   
+
+
+
+
+        """self.infoshape = self.input_nexusfile.getinfo()
+        self.dim_images = (self.infoshape[0][0], self.infoshape[0][1], 
+                               self.infoshape[0][2])
+        self.nFrames = self.infoshape[0][0]
+        self.numrows = self.infoshape[0][1]
+        self.numcols = self.infoshape[0][2]"""
 
 
 
