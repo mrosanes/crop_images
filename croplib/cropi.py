@@ -73,13 +73,13 @@ class CropClass:
     def cropFunc(self):
 
         print("crop function")
-        self.crop_top_rows = c_tr = 0 #raw_input(
+        self.crop_top_rows = c_tr = 30 #raw_input(
                                        #"Number of top rows to be cropped: ")
-        self.crop_bottom_rows = c_br = 0 #raw_input(
+        self.crop_bottom_rows = c_br = 30 #raw_input(
                                       # "Number of bottom rows to be cropped: ")
-        self.crop_left_columns = c_lc = 0 #raw_input(
+        self.crop_left_columns = c_lc = 20 #raw_input(
                                      #"Number of left columns to be cropped: ")
-        self.crop_right_columns = c_rc = 0 #raw_input(
+        self.crop_right_columns = c_rc = 20 #raw_input(
                                     #"Number of right columns to be cropped: ")
 
         cropentry = self.itreename + '_cropisis'
@@ -102,10 +102,31 @@ class CropClass:
         tomonorm_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
 
         numimg = 0
-        image_retrieved = tomonorm_grp.TomoNormalized[0, :, :] #, [1, self.numrows, self.numcols])
+
+        ro_to = self.numrows - c_br 
+        co_to = self.numcols - c_rc
+        image_retrieved = tomonorm_grp.TomoNormalized[0, c_tr:ro_to, c_lc:co_to]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
         #tomonorm_grp.TomoNormalized_cropis.put(image_retrieved, [80,0,0])
-        tomonorm_grp[cropentry].put(image_retrieved, [80,0,0])
+        tomonorm_grp[cropentry].put(image_retrieved, [76,0,0])
 
         tomonorm_grp[cropentry].write()
         #tomonorm_grp[cropentry].save()
