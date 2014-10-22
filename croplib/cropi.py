@@ -27,6 +27,10 @@ class CropClass:
 
     ### Constructor of CropClass objects ###
     def __init__(self, inputfile, inputtree, crop, newhdf5):
+        self.new = 0
+        if (newhdf5 == 1):
+            self.new = 1
+
         self.input_nexusfile = nxs.load(inputfile, mode='rw')
 
         #self.input_nexusfile = nxs.open(inputfile, 'rw') 
@@ -40,6 +44,11 @@ class CropClass:
             self.itreename = inputtree.rsplit('/', 1)[1]
         else:
             self.itreename = self.itree
+
+        if (self.new == 1):
+            self.outputfilehdf5 = inputfile.split('.hdf')[0]+'_crop'+'.hdf5'
+            self.outcrop = nxs.NXentry(name= self.itreepath)
+            self.outcrop.save(self.outputfilehdf5, 'w5')
 
         if not self.ifilepath:
             self.ifilepath = '.'
@@ -83,33 +92,45 @@ class CropClass:
                
         self.numrows_ac = self.numrows - c_tr - c_br
         self.numcols_ac = self.numcols - c_lc - c_rc
-
-
-        img_grp[cropentry] = nxs.NXfield(
-                      dtype='float32' , 
-                      shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
-
-        img_grp[cropentry].attrs['Number of Frames'] = self.nFrames
-        img_grp[cropentry].attrs['Pixel Rows'] = self.numrows_ac
-        img_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
-        img_grp[cropentry].write()
-
-        numimg = 0    
+        numimg = 0  
 
         ro_to = self.numrows - c_br 
         co_to = self.numcols - c_rc
 
-        for numimg in range(self.nFrames):
-            image_retrieved = img_grp[self.itreename][
-                                             numimg, c_tr:ro_to, c_lc:co_to]
-            img_grp[cropentry].put(image_retrieved, [numimg,0,0])
-            print("image " + str(numimg) + " cropped")
+        if (self.new == 0):
+            img_grp[cropentry] = nxs.NXfield(
+                      dtype='float32' , 
+                      shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
 
-        img_grp[cropentry].write()
-        
+            img_grp[cropentry].attrs['Number of Frames'] = self.nFrames
+            img_grp[cropentry].attrs['Pixel Rows'] = self.numrows_ac
+            img_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
+            img_grp[cropentry].write()
 
+            for numimg in range(self.nFrames):
+                image_retrieved = img_grp[self.itreename][
+                                                 numimg, c_tr:ro_to, c_lc:co_to]
+                img_grp[cropentry].put(image_retrieved, [numimg,0,0])
+                print("image " + str(numimg) + " cropped")
 
+            img_grp[cropentry].write()
 
+        elif (self.new == 1):
+            self.outcrop[cropentry] = nxs.NXfield(
+                      dtype='float32' , 
+                      shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
+
+            self.outcrop[cropentry].attrs['Number of Frames'] = self.nFrames
+            self.outcrop[cropentry].attrs['Pixel Rows'] = self.numrows_ac
+            self.outcrop[cropentry].attrs['Pixel Columns'] = self.numcols_ac
+            self.outcrop[cropentry].write()
+
+            for numimg in range(self.nFrames):
+                image_retrieved = img_grp[self.itreename][
+                                                 numimg, c_tr:ro_to, c_lc:co_to]
+                self.outcrop[cropentry].put(image_retrieved, [numimg,0,0])
+                print("image " + str(numimg) + " cropped")
+            img_grp[cropentry].write()
 
 
 
