@@ -29,15 +29,19 @@ def main():
 
     parser.add_argument('inputfile', type=str, default=None,
                help='Enter hdf5 file containing the normalized tomography')
-    parser.add_argument('-t' ,'--inputtree', type=str, default='TomoNormalized',
+    parser.add_argument('-t' ,'--inputtree', 
+               type=str, default='TomoNormalized/TomoNormalized',
                help='Enter hdf5 tree containing the normalized tomography')
     parser.add_argument('-c', '--crop', type=int, default=0, 
                help='Crop images (-c=1) || Do Not Crop images (-c=0)')
+    parser.add_argument('-n', '--newhdf5', type=int, default=0, 
+               help='Store cropped images in new hdf5')
                                  
     args = parser.parse_args()
     
     print("\nCrop images\n")
-    crop_obj = cropi.CropClass(args.inputfile, args.inputtree, args.crop)
+    crop_obj = cropi.CropClass(args.inputfile, 
+                    args.inputtree, args.crop, args.newhdf5)
     crop_obj.cropFunc()
     print("\nImages cropped\n\n")
 

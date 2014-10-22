@@ -26,7 +26,7 @@ import os
 class CropClass:
 
     ### Constructor of CropClass objects ###
-    def __init__(self, inputfile, inputtree, crop):
+    def __init__(self, inputfile, inputtree, crop, newhdf5):
         self.input_nexusfile = nxs.load(inputfile, mode='rw')
 
         #self.input_nexusfile = nxs.open(inputfile, 'rw') 
@@ -61,51 +61,85 @@ class CropClass:
         self.crop_right_columns = 0
         return
 
-
-
-
-
-    ### Save image ###
-    def writeImageInHdf5(self, image, nxsfied , slab_offset):
-        nxsfied.put(image, slab_offset, refresh=False)
-        nxsfied.write()
     
     def cropFunc(self):
 
-        print("crop function")
-        self.crop_top_rows = c_tr = 30 #raw_input(
+        print("cropping...")
+        self.crop_top_rows = c_tr = 25 #raw_input(
                                        #"Number of top rows to be cropped: ")
-        self.crop_bottom_rows = c_br = 30 #raw_input(
+        self.crop_bottom_rows = c_br = 25 #raw_input(
                                       # "Number of bottom rows to be cropped: ")
-        self.crop_left_columns = c_lc = 20 #raw_input(
+        self.crop_left_columns = c_lc = 25 #raw_input(
                                      #"Number of left columns to be cropped: ")
-        self.crop_right_columns = c_rc = 20 #raw_input(
+        self.crop_right_columns = c_rc = 25 #raw_input(
                                     #"Number of right columns to be cropped: ")
 
-        cropentry = self.itreename + '_cropisis'
+        cropentry = self.itreename + '_crop2'
 
-      
-        tomonorm_grp = self.input_nexusfile.TomoNormalized
-        self.nFrames = tomonorm_grp.TomoNormalized.shape[0]
-        self.numrows = tomonorm_grp.TomoNormalized.shape[1]
-        self.numcols = tomonorm_grp.TomoNormalized.shape[2]
+        img_grp = self.input_nexusfile[self.itreepath]
+        self.nFrames = img_grp[self.itreename].shape[0]
+        self.numrows = img_grp[self.itreename].shape[1]
+        self.numcols = img_grp[self.itreename].shape[2]
                
         self.numrows_ac = self.numrows - c_tr - c_br
         self.numcols_ac = self.numcols - c_lc - c_rc
 
 
-        tomonorm_grp[cropentry] = nxs.NXfield(
-                      name=cropentry, dtype='float32' , 
+        img_grp[cropentry] = nxs.NXfield(
+                      dtype='float32' , 
                       shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
-        tomonorm_grp[cropentry].attrs['Number of Frames'] = self.nFrames
-        tomonorm_grp[cropentry].attrs['Pixel Rows'] = self.numrows_ac
-        tomonorm_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
 
-        numimg = 0
+        img_grp[cropentry].attrs['Number of Frames'] = self.nFrames
+        img_grp[cropentry].attrs['Pixel Rows'] = self.numrows_ac
+        img_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
+        img_grp[cropentry].write()
+
+        numimg = 0    
 
         ro_to = self.numrows - c_br 
         co_to = self.numcols - c_rc
-        image_retrieved = tomonorm_grp.TomoNormalized[0, c_tr:ro_to, c_lc:co_to]
+
+        for numimg in range(self.nFrames):
+            image_retrieved = img_grp[self.itreename][
+                                             numimg, c_tr:ro_to, c_lc:co_to]
+            img_grp[cropentry].put(image_retrieved, [numimg,0,0])
+            print("image " + str(numimg) + " cropped")
+
+        img_grp[cropentry].write()
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        """    
+        print("###hih###")
+        print image_retrieved[0][0][0]
+        print(image_retrieved.shape)
+        print("###hih###")
+
+        print("#########")
+        print(img_grp.TomoNormalized.attrs)
+        print(img_grp.TomoNormalized.shape)
+        print("#########")
+        #print(self.input_nexusfile.TomoNormalized[cropentry])
+        print(self.ifilepath)
+        print(self.ifilepathname)
+        print(self.ifilename)
+        print(self.nFrames)
+        print(self.input_nexusfile.__class__)
+        """
 
 
 
@@ -123,15 +157,20 @@ class CropClass:
 
 
 
+        #img_grp[cropentry].save()
+
+        #print(image_retrieved)
 
 
-        #tomonorm_grp.TomoNormalized_cropis.put(image_retrieved, [80,0,0])
-        tomonorm_grp[cropentry].put(image_retrieved, [76,0,0])
 
-        tomonorm_grp[cropentry].write()
-        #tomonorm_grp[cropentry].save()
 
-        print(image_retrieved)
+
+
+        #img_grp[cropentry]
+        #img_grp[cropentry] = image_retrieved
+        #nxsfied.put(image, slab_offset, refresh=False)
+        #img_grp[cropentry].write()
+
 
 
 
@@ -155,33 +194,6 @@ class CropClass:
 
 
 
-
-
-        #tomonorm_grp[cropentry]
-        #tomonorm_grp[cropentry] = image_retrieved
-        #nxsfied.put(image, slab_offset, refresh=False)
-        #tomonorm_grp[cropentry].write()
-
-
-        print("###hih###")
-        print image_retrieved[0][0][0]
-        print(image_retrieved.shape)
-        print("###hih###")
-
-        print("#########")
-        print(tomonorm_grp.TomoNormalized.attrs)
-        print(tomonorm_grp.TomoNormalized.shape)
-        print("#########")
-        #print(self.input_nexusfile.TomoNormalized[cropentry])
-        print(self.ifilepath)
-        print(self.ifilepathname)
-        print(self.ifilename)
-        print(self.nFrames)
-        print(self.input_nexusfile.__class__)
-
-
-
-
         #self.input_nexusfile.opengroup('TomoNormalized')
         #self.input_nexusfile.opendata(self.itreename)
         #slab_offset = [1, 0, 0]
@@ -189,6 +201,15 @@ class CropClass:
 
         #print(self.input_nexusfile.tree)
         #print(self.input_nexusfile.TomoNormalized.TomoNormalized[0, 0 , 0])
+
+
+
+
+
+
+
+
+
 
 
 
