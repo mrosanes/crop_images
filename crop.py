@@ -28,12 +28,10 @@ def main():
                               description="Align the tomography projections \n")
 
     parser.add_argument('inputfile', type=str, default=None,
-               help='Enter hdf5 file containing the normalized tomography')
+               help='Enter hdf5 file containing the images to be cropped')
     parser.add_argument('-t' ,'--inputtree', 
                type=str, default='TomoNormalized/TomoNormalized',
-               help='Enter hdf5 tree containing the normalized tomography')
-    parser.add_argument('-c', '--crop', type=int, default=0, 
-               help='Crop images (-c=1) || Do Not Crop images (-c=0)')
+               help='Enter hdf5 tree containing the images to be cropped')
     parser.add_argument('-n', '--newhdf5', type=int, default=0, 
                help='Store cropped images in new hdf5')
                                  
@@ -41,7 +39,7 @@ def main():
     
     print("\nCrop images\n")
     crop_obj = cropi.CropClass(args.inputfile, 
-                    args.inputtree, args.crop, args.newhdf5)
+                    args.inputtree, args.newhdf5)
     crop_obj.cropFunc()
     print("\nImages cropped\n\n")
 
