@@ -20,7 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import numpy as np
-import nxs
+import h5py
 import os
 
 class CropClass:
@@ -31,9 +31,10 @@ class CropClass:
         if (newhdf5 == 1):
             self.new = 1
 
-        self.input_nexusfile = nxs.load(inputfile, mode='rw')
-
-        #self.input_nexusfile = nxs.open(inputfile, 'rw') 
+        self.inputh5 = h5py.File(inputfile, mode='r+')
+        if (self.new == 1):
+            self.outputfilehdf5 = inputfile.split('.hdf')[0]+'_crop'+'.hdf5'
+        
         self.ifilepathname = inputfile
         self.ifilepath = os.path.dirname(inputfile)
         self.ifilename = inputfile.split('/')[-1]
@@ -53,11 +54,6 @@ class CropClass:
             else:
                 self.storetreename = self.storetree
 
-        if (self.new == 1):
-            self.outputfilehdf5 = inputfile.split('.hdf')[0]+'_crop'+'.hdf5'
-            self.outcrop = nxs.NXentry(name= self.itreepath)
-            self.outcrop.save(self.outputfilehdf5, 'w5')
-
         if not self.ifilepath:
             self.ifilepath = '.'          
 
@@ -70,30 +66,33 @@ class CropClass:
         # Image dimensions after cropping              
         self.numrows_ac = 0
         self.numcols_ac = 0
-
         self.crop_top_rows = 0
         self.crop_bottom_rows = 0
         self.crop_left_columns = 0
         self.crop_right_columns = 0
         return
- 
+
     def cropFunc(self):
         print("cropping...")
+        
         self.crop_top_rows = c_tr = 10 #int(raw_input(
                       #"Number of top rows to be cropped: "))
         self.crop_bottom_rows = c_br = 10 #int(raw_input(
                       #"Number of bottom rows to be cropped: "))
-        self.crop_left_columns = c_lc = 10 #int(raw_input(
+        self.crop_left_columns = c_lc = 200 #int(raw_input(
                       #"Number of left columns to be cropped: "))
-        self.crop_right_columns = c_rc = 10 #int(raw_input(
+        self.crop_right_columns = c_rc = 200 #int(raw_input(
                       #"Number of right columns to be cropped: "))
 
-        cropentry = self.itreename + '_crop2'
-        if self.storetree != None:
-            cropentry = self.storetreename
-
+        cropentry = self.itreename + '_crop'
+        #if self.storetree != None:
+        #    cropentry = self.storetreename 
         try:
-            img_grp = self.input_nexusfile[self.itreepath]
+            ih5 = self.inputh5
+            grps = self.itreepath.split('/')
+            img_grp = ih5.get(grps[0])
+            for i in range(1, len(grps)):
+                img_grp = img_grp.get(grps[i])
             self.nFrames = img_grp[self.itreename].shape[0]
             self.numrows = img_grp[self.itreename].shape[1]
             self.numcols = img_grp[self.itreename].shape[2]
@@ -110,41 +109,46 @@ class CropClass:
         co_to = self.numcols - c_rc
 
         if (self.new == 0):
-            img_grp[cropentry] = nxs.NXfield(
-               dtype='float32' , 
-               shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
-
-            img_grp[cropentry].attrs['Number of Frames'] = self.nFrames
-            img_grp[cropentry].attrs['Pixel Rows'] = self.numrows_ac
-            img_grp[cropentry].attrs['Pixel Columns'] = self.numcols_ac
-            img_grp[cropentry].write()
-
-            for numimg in range(self.nFrames):
-                image_retrieved = img_grp[self.itreename][
-                                        numimg, c_tr:ro_to, c_lc:co_to]
-                img_grp[cropentry].put(image_retrieved, [numimg,0,0])
-                print("image " + str(numimg) + " cropped")
-
-            img_grp[cropentry].write()
-
-        elif (self.new == 1):
-            self.outcrop[cropentry] = nxs.NXfield(
-                dtype='float32' , 
-                shape=[nxs.UNLIMITED, self.numrows_ac, self.numcols_ac])
-
-            self.outcrop[cropentry].attrs['Number of Frames'] = self.nFrames
-            self.outcrop[cropentry].attrs['Pixel Rows'] = self.numrows_ac
-            self.outcrop[cropentry].attrs['Pixel Columns'] = self.numcols_ac
-            self.outcrop[cropentry].write()
+            try:
+                dsetcrop = img_grp.create_dataset(cropentry,
+                            (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                            maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                            dtype='float32')
+                dsetcrop.attrs['Number of Frames'] = self.nFrames
+                dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
+                dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
+            except:
+                print("\nError: The dataset %s probably exists already:" 
+                      % cropentry)
+                print("Delete it before continuing.\n")
+                return
 
             for numimg in range(self.nFrames):
                 image_retrieved = img_grp[self.itreename][
                                     numimg, c_tr:ro_to, c_lc:co_to]
-                self.outcrop[cropentry].put(image_retrieved, [numimg,0,0])
+                dsetcrop[numimg,:,:] = image_retrieved     
                 print("image " + str(numimg) + " cropped")
-            self.outcrop[cropentry].write()
+  
+        elif (self.new == 1):
+            f = h5py.File(self.outputfilehdf5, "w")
+            groups = self.storetreepath.split('/')
+            self.grpcrop = f.create_group(groups[0])
+            for i in range(1, len(groups)):
+                self.grpcrop = self.grpcrop.create_group(groups[i])
+                
+            dsetcrop = self.grpcrop.create_dataset("dataset", 
+                        (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                        maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                        dtype='float32')
+            dsetcrop.attrs['Number of Frames'] = self.nFrames
+            dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
+            dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
+
+            for numimg in range(self.nFrames):
+                image_retrieved = img_grp[self.itreename][
+                                    numimg, c_tr:ro_to, c_lc:co_to]
+                dsetcrop[numimg,:,:] = image_retrieved     
+                print("image " + str(numimg) + " cropped")
 
         print("\nImages cropped\n\n")
-
-
 

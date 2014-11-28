@@ -1,5 +1,5 @@
 crop_images is a program used to crop image stacks.
-It wants to be a general SW that can be used in beamlines working with 2D image
+It aims to be a general SW that can be used in beamlines working with 2D image
 stacks.
 The input must be a stack of images in hdf5, and the output is stored in hdf5
 format as well.

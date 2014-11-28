@@ -31,12 +31,14 @@ def main():
                help='Enter hdf5 file containing the images to be cropped')
     parser.add_argument('-t' ,'--inputtree', 
                type=str, default='TomoNormalized/TomoNormalized',
-               help='Enter hdf5 tree containing the images to be cropped')
+               help='Enter hdf5 tree containing the images to be cropped.\n' +
+                    'Default: TomoNormalized/TomoNormalized')
     parser.add_argument('-s' ,'--storetree', 
-               type=str, default=None,
-               help='Enter hdf5 tree where the cropped images will be stored')
+               type=str, default='TomoNormalized/TomoNormalized',
+               help='Enter hdf5 tree where the cropped images will be stored.\n' +
+                    'Default: TomoNormalized/TomoNormalized')
     parser.add_argument('-n', '--newhdf5', type=int, default=0, 
-               help='Store cropped images in new hdf5')
+               help='Store cropped images in new hdf5 (default=0)')
                                  
     args = parser.parse_args()
     
