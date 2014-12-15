@@ -51,6 +51,7 @@ class CropClass:
             self.itreename = self.itree
 
         self.storetree = storetree
+        self.storetreepath = None
         if self.storetree != None:
             if '/' in self.storetree:
                 self.storetreepath = storetree.rsplit('/', 1)[0]
@@ -135,15 +136,23 @@ class CropClass:
   
         elif (self.new != None):
             f = h5py.File(self.outputfilehdf5, "w")
-            groups = self.storetreepath.split('/')
-            self.grpcrop = f.create_group(groups[0])
-            for i in range(1, len(groups)):
-                self.grpcrop = self.grpcrop.create_group(groups[i])
+
+            if self.storetreepath != None:
+                groups = self.storetreepath.split('/')
+                self.grpcrop = f.create_group(groups[0])
+                for i in range(1, len(groups)):
+                    self.grpcrop = self.grpcrop.create_group(groups[i])
                 
-            dsetcrop = self.grpcrop.create_dataset(self.storetreename, 
-                        (self.nFrames, self.numrows_ac, self.numcols_ac), 
-                        maxshape=(None, self.numrows_ac, self.numcols_ac), 
-                        dtype='float32')
+                dsetcrop = self.grpcrop.create_dataset(self.storetreename, 
+                            (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                            maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                            dtype='float32')
+            else:
+                dsetcrop = f.create_dataset(self.storetreename, 
+                            (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                            maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                            dtype='float32')
+
             dsetcrop.attrs['Number of Frames'] = self.nFrames
             dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
             dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
