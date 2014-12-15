@@ -24,6 +24,7 @@ import h5py
 import os
 
 class CropClass:
+    """Class used to crop hdf5 image stacks"""
 
     ### Constructor of CropClass objects ###
     def __init__(self, inputfile, inputtree, storetree, newhdf5):
@@ -78,20 +79,17 @@ class CropClass:
         return
 
     def cropFunc(self):
-        print("cropping...")
         
-        self.crop_top_rows = c_tr = 10 #int(raw_input(
-                      #"Number of top rows to be cropped: "))
-        self.crop_bottom_rows = c_br = 10 #int(raw_input(
-                      #"Number of bottom rows to be cropped: "))
-        self.crop_left_columns = c_lc = 200 #int(raw_input(
-                      #"Number of left columns to be cropped: "))
-        self.crop_right_columns = c_rc = 200 #int(raw_input(
-                      #"Number of right columns to be cropped: "))
+        self.crop_top_rows = c_tr = int(raw_input(
+                      "Number of top rows to be cropped: "))
+        self.crop_bottom_rows = c_br = int(raw_input(
+                      "Number of bottom rows to be cropped: "))
+        self.crop_left_columns = c_lc = int(raw_input(
+                      "Number of left columns to be cropped: "))
+        self.crop_right_columns = c_rc = int(raw_input(
+                      "Number of right columns to be cropped: "))
 
-        cropentry = self.itreename + '_crop'
-        #if self.storetree != None:
-        #    cropentry = self.storetreename 
+        print("cropping...")
         try:
             ih5 = self.inputh5
             grps = self.itreepath.split('/')
@@ -112,28 +110,34 @@ class CropClass:
 
         ro_to = self.numrows - c_br 
         co_to = self.numcols - c_rc
-
+    
+        # Store cropped images in the same file and group, with the indicated
+        # dataset name
         if (self.new == None):
+            cropentry = self.storetreename
+
             try:
-                dsetcrop = img_grp.create_dataset(cropentry,
-                            (self.nFrames, self.numrows_ac, self.numcols_ac), 
-                            maxshape=(None, self.numrows_ac, self.numcols_ac), 
-                            dtype='float32')
-                dsetcrop.attrs['Number of Frames'] = self.nFrames
-                dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
-                dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
+                del img_grp[cropentry]
+                print("Dataset \"" + cropentry + "\" will be replaced")
             except:
-                print("\nError: The dataset %s probably exists already:" 
-                      % cropentry)
-                print("Delete it before continuing.\n")
-                return
+                pass
+
+            dsetcrop = img_grp.create_dataset(cropentry,
+                        (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                        maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                        dtype='float32')
+            dsetcrop.attrs['Number of Frames'] = self.nFrames
+            dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
+            dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
 
             for numimg in range(self.nFrames):
                 image_retrieved = img_grp[self.itreename][
                                     numimg, c_tr:ro_to, c_lc:co_to]
-                dsetcrop[numimg,:,:] = image_retrieved     
-                print("image " + str(numimg) + " cropped")
+                dsetcrop[numimg,:,:] = image_retrieved
+                if (numimg % 5 == 0):
+                    print("Image " + str(numimg) + " cropped")
   
+        # Create a new hdf5 file with the cropped images
         elif (self.new != None):
             f = h5py.File(self.outputfilehdf5, "w")
 
@@ -160,8 +164,9 @@ class CropClass:
             for numimg in range(self.nFrames):
                 image_retrieved = img_grp[self.itreename][
                                     numimg, c_tr:ro_to, c_lc:co_to]
-                dsetcrop[numimg,:,:] = image_retrieved     
-                print("image " + str(numimg) + " cropped")
+                dsetcrop[numimg,:,:] = image_retrieved  
+                if (numimg % 5 == 0):   
+                    print("Image " + str(numimg) + " cropped")
 
         print("\nImages cropped\n\n")
 
