@@ -34,9 +34,9 @@ def main():
                help='Enter hdf5 tree containing the images to be cropped.\n' +
                     'Default: TomoNormalized/TomoNormalized')
     parser.add_argument('-s' ,'--storetree', 
-               type=str, default='TomoNormalized/TomoNormalized',
+               type=str, default='DataFolder/DataSet',
                help='Enter hdf5 tree where the cropped images will be stored.\n' +
-                    'Default: TomoNormalized/TomoNormalized')
+                    'Default: DataFolder/DataSet')
     parser.add_argument('-n', '--newhdf5', type=int, default=0, 
                help='Store cropped images in new hdf5 (default=0)')
                                  

@@ -136,7 +136,7 @@ class CropClass:
             for i in range(1, len(groups)):
                 self.grpcrop = self.grpcrop.create_group(groups[i])
                 
-            dsetcrop = self.grpcrop.create_dataset("dataset", 
+            dsetcrop = self.grpcrop.create_dataset(self.storetreename, 
                         (self.nFrames, self.numrows_ac, self.numcols_ac), 
                         maxshape=(None, self.numrows_ac, self.numcols_ac), 
                         dtype='float32')
