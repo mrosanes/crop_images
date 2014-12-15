@@ -27,14 +27,18 @@ class CropClass:
 
     ### Constructor of CropClass objects ###
     def __init__(self, inputfile, inputtree, storetree, newhdf5):
-        self.new = 0
-        if (newhdf5 == 1):
-            self.new = 1
 
         self.inputh5 = h5py.File(inputfile, mode='r+')
-        if (self.new == 1):
-            self.outputfilehdf5 = inputfile.split('.hdf')[0]+'_crop'+'.hdf5'
-        
+
+        self.new = None
+        if (newhdf5 != None):
+            self.new = newhdf5
+
+            if (self.new == "default"):
+                self.outputfilehdf5 = inputfile.split('.hdf')[0]+'_crop'+'.hdf5'
+            else:
+                self.outputfilehdf5 = newhdf5
+ 
         self.ifilepathname = inputfile
         self.ifilepath = os.path.dirname(inputfile)
         self.ifilename = inputfile.split('/')[-1]
@@ -108,7 +112,7 @@ class CropClass:
         ro_to = self.numrows - c_br 
         co_to = self.numcols - c_rc
 
-        if (self.new == 0):
+        if (self.new == None):
             try:
                 dsetcrop = img_grp.create_dataset(cropentry,
                             (self.nFrames, self.numrows_ac, self.numcols_ac), 
@@ -129,7 +133,7 @@ class CropClass:
                 dsetcrop[numimg,:,:] = image_retrieved     
                 print("image " + str(numimg) + " cropped")
   
-        elif (self.new == 1):
+        elif (self.new != None):
             f = h5py.File(self.outputfilehdf5, "w")
             groups = self.storetreepath.split('/')
             self.grpcrop = f.create_group(groups[0])

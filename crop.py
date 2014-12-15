@@ -37,8 +37,8 @@ def main():
                type=str, default='DataFolder/DataSet',
                help='Enter hdf5 tree where the cropped images will be stored.\n' +
                     'Default: DataFolder/DataSet')
-    parser.add_argument('-n', '--newhdf5', type=int, default=0, 
-               help='Store cropped images in new hdf5 (default=0)')
+    parser.add_argument('-n', '--newhdf5', type=str, default=None, 
+               help='Store cropped images in new hdf5 (default=None)')
                                  
     args = parser.parse_args()
     
