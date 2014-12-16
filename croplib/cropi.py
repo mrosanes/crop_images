@@ -114,29 +114,51 @@ class CropClass:
         # Store cropped images in the same file and group, with the indicated
         # dataset name
         if (self.new == None):
-            cropentry = self.storetreename
+            crop_dest = self.storetreename
 
-            try:
-                del img_grp[cropentry]
-                print("Dataset \"" + cropentry + "\" will be replaced")
-            except:
-                pass
+            if (crop_dest == self.itreename):
+                #Input and output dataset name are the same
+                img_grp.copy(crop_dest, "__copy__copy__")
+                del img_grp[crop_dest]
+                print("Dataset \"" + crop_dest + "\" will be replaced")
 
-            dsetcrop = img_grp.create_dataset(cropentry,
-                        (self.nFrames, self.numrows_ac, self.numcols_ac), 
-                        maxshape=(None, self.numrows_ac, self.numcols_ac), 
-                        dtype='float32')
-            dsetcrop.attrs['Number of Frames'] = self.nFrames
-            dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
-            dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
+                dsetcrop = img_grp.create_dataset(crop_dest,
+                            (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                            maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                            dtype='float32')
+                dsetcrop.attrs['Number of Frames'] = self.nFrames
+                dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
+                dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
 
-            for numimg in range(self.nFrames):
-                image_retrieved = img_grp[self.itreename][
-                                    numimg, c_tr:ro_to, c_lc:co_to]
-                dsetcrop[numimg,:,:] = image_retrieved
-                if (numimg % 5 == 0):
-                    print("Image " + str(numimg) + " cropped")
-  
+                for numimg in range(self.nFrames):
+                    image_retrieved = img_grp["__copy__copy__"][numimg, 
+                                                      c_tr:ro_to, c_lc:co_to]
+                    dsetcrop[numimg,:,:] = image_retrieved
+                    if (numimg % 5 == 0):
+                        print("Image " + str(numimg) + " cropped")
+                del img_grp["__copy__copy__"]
+            else:
+                #Input and output dataset name are different
+                try:
+                    del img_grp[crop_dest]
+                    print("Dataset \"" + crop_dest + "\" will be replaced")
+                except:
+                    pass
+                dsetcrop = img_grp.create_dataset(crop_dest,
+                            (self.nFrames, self.numrows_ac, self.numcols_ac), 
+                            maxshape=(None, self.numrows_ac, self.numcols_ac), 
+                            dtype='float32')
+                dsetcrop.attrs['Number of Frames'] = self.nFrames
+                dsetcrop.attrs['Pixel Rows'] = self.numrows_ac
+                dsetcrop.attrs['Pixel Columns'] = self.numcols_ac
+
+                for numimg in range(self.nFrames):
+                    image_retrieved = img_grp[self.itreename][
+                                        numimg, c_tr:ro_to, c_lc:co_to]
+                    dsetcrop[numimg,:,:] = image_retrieved
+                    if (numimg % 5 == 0):
+                        print("Image " + str(numimg) + " cropped")
+
         # Create a new hdf5 file with the cropped images
         elif (self.new != None):
             f = h5py.File(self.outputfilehdf5, "w")
