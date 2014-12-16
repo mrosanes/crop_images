@@ -3,3 +3,8 @@ It aims to be a general SW that can be used in beamlines working with 2D image
 stacks.
 The input must be a stack of images in hdf5, and the output is stored in hdf5
 format as well.
+
+h5py > 1.8 has to be used in order to have availability of the function
+copy from h5py; this function is used in the script when we like to 
+replace an existing dataset by the cropped dataset in the same exact location
+where the original exisiting dataset was placed.
