@@ -25,7 +25,7 @@ import argparse
 
 def main():
     parser = argparse.ArgumentParser(
-                              description="Align the tomography projections \n")
+                              description="Crop hdf5 image stacks \n")
 
     parser.add_argument('inputfile', type=str, default=None,
                help='Enter hdf5 file containing the images to be cropped')
@@ -41,7 +41,7 @@ def main():
                     'images will be stored. \n' +
                     'Default: DataSet')
     parser.add_argument('-n', '--newhdf5', type=str, default=None, 
-               help='Store cropped images in new hdf5 (default=None)')
+               help='Store cropped images in new hdf5 file (default=None)')
                                  
     args = parser.parse_args()
     
