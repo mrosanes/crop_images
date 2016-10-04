@@ -78,16 +78,25 @@ class CropClass:
         self.crop_right_columns = 0
         return
 
-    def cropFunc(self):
-        
-        self.crop_top_rows = c_tr = int(raw_input(
-                      "Number of top rows to be cropped: "))
-        self.crop_bottom_rows = c_br = int(raw_input(
-                      "Number of bottom rows to be cropped: "))
-        self.crop_left_columns = c_lc = int(raw_input(
-                      "Number of left columns to be cropped: "))
-        self.crop_right_columns = c_rc = int(raw_input(
-                      "Number of right columns to be cropped: "))
+    def cropFunc(self, crop_rows_and_colums=None):
+
+        if crop_rows_and_colums is not None:
+            try:
+                self.crop_top_rows,\
+                self.crop_bottom_rows,\
+                self.crop_left_columns,\
+                self.crop_right_columns = crop_rows_and_colums
+            except ValueError:
+                raise Exception("Wrong number of parameters. Aborting...")
+        else:
+            self.crop_top_rows = c_tr = int(raw_input(
+                          "Number of top rows to be cropped: "))
+            self.crop_bottom_rows = c_br = int(raw_input(
+                          "Number of bottom rows to be cropped: "))
+            self.crop_left_columns = c_lc = int(raw_input(
+                          "Number of left columns to be cropped: "))
+            self.crop_right_columns = c_rc = int(raw_input(
+                          "Number of right columns to be cropped: "))
 
         print("cropping...")
         try:

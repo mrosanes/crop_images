@@ -42,12 +42,16 @@ def main():
                     'Default: DataSet')
     parser.add_argument('-n', '--newhdf5', type=str, default=None, 
                help='Store cropped images in new hdf5 file (default=None)')
+
+    parser.add_argument('-r', '--roi', nargs='+', type=int, default=None,
+               help='List with the 4 crop coordinates(default=None)')
                                  
     args = parser.parse_args()
     
     print("\nCrop images\n")
-    crop_obj = cropi.CropClass(args.inputfile, 
+    crop_obj = cropi.CropClass(args.inputfile,
                     args.inputtree, args.storetree, args.newhdf5)
+    print args.roi
     crop_obj.cropFunc()
 
 if __name__ == "__main__":
