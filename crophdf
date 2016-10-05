@@ -51,8 +51,7 @@ def main():
     print("\nCrop images\n")
     crop_obj = cropi.CropClass(args.inputfile,
                     args.inputtree, args.storetree, args.newhdf5)
-    print args.roi
-    crop_obj.cropFunc()
+    crop_obj.cropFunc(args.roi)
 
 if __name__ == "__main__":
     main()
