@@ -86,6 +86,8 @@ class CropClass:
                 self.crop_bottom_rows,\
                 self.crop_left_columns,\
                 self.crop_right_columns = crop_rows_and_colums
+                # initialize local variables
+                ctr, cbr, c_lc, c_rc = crop_rows_and_colums
             except ValueError:
                 raise Exception("Wrong number of parameters. Aborting...")
         else:
